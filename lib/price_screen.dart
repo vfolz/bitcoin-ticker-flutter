@@ -13,9 +13,14 @@ class _PriceScreenState extends State<PriceScreen> {
     List<DropdownMenuItem<String>> buildItems (List<String> items) {
       List<DropdownMenuItem<String>> menuList = List();
 
-      for (int i = 0; i < items.length; i++) {
-          menuList.add( DropdownMenuItem<String>(child: Text(items[i]), value:items[i]));
+//      for (int i = 0; i < items.length; i++) {
+//          menuList.add( DropdownMenuItem<String>(child: Text(items[i]), value:items[i]));
+//      }
+
+      for (String item in items) {
+        menuList.add( DropdownMenuItem<String>(child: Text(item), value:item));
       }
+
       return menuList;
     }
 
