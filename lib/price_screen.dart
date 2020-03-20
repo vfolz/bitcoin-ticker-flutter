@@ -21,7 +21,7 @@ class _PriceScreenState extends State<PriceScreen> {
     String selectedCurrency = 'USD';
     return Scaffold(
       appBar: AppBar(
-        title: Text('🤑 Coin Tickerssssss'),
+        title: Text('🤑 Coin Tickerssssssssss'),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
