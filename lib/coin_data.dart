@@ -31,17 +31,27 @@ const List<String> cryptoList = [
   'LTC',
 ];
 
+const coinAPIURL =
+    'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=';
+const apiKey = 'U2Z7AHEJ2U5IKF5C';
+
 class CoinData {
- CoinData(this.url);
-  final String url;
+  Future getCoinData(String selectedCurrency) async {
+    Map exchangeRate = Map();
 
-    Future  getCoinData() async{
-    http.Response response = await http.get(url);
-    if (response.statusCode == 200){
-      return jsonDecode(response.body);
+    for (String cryptoCurrency in cryptoList) {
+      String requestURL =
+          '$coinAPIURL$cryptoCurrency&to_currency=$selectedCurrency&apikey=$apiKey';
+      http.Response response = await http.get(requestURL);
+      if (response.statusCode == 200) {
+        var decodedData = jsonDecode(response.body);
+           exchangeRate[cryptoCurrency] = decodedData['Realtime Currency Exchange Rate']['5. Exchange Rate'];
 
-    }else{
-      return response.statusCode;
+      } else {
+        print(response.statusCode);
+        throw 'Problem with the get request';
+      }
     }
+     return exchangeRate;
   }
 }

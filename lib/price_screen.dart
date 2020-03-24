@@ -3,17 +3,13 @@ import 'package:flutter/cupertino.dart';
 import 'coin_data.dart';
 import 'dart:io' show Platform;
 
-
 class PriceScreen extends StatefulWidget {
   @override
   _PriceScreenState createState() => _PriceScreenState();
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  final kApiKey = 'U2Z7AHEJ2U5IKF5C';
-  double exchangeRate = 0.00;
-  var data;
-
+  Map exchangeRate = Map();
   String selectedCurrency = 'USD';
 
   DropdownButton<String> androidDropdown() {
@@ -32,8 +28,7 @@ class _PriceScreenState extends State<PriceScreen> {
       onChanged: (value) {
         setState(() {
           selectedCurrency = value;
-          getCrypto();
-
+          getData();
         });
       },
     );
@@ -55,70 +50,92 @@ class _PriceScreenState extends State<PriceScreen> {
     );
   }
 
- 
-  void getData(String cryptoCurrency) async {
-    String url =
-        'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=$cryptoCurrency&to_currency=$selectedCurrency&apikey=$kApiKey';
-    CoinData coinData = CoinData(url);
-    data = await coinData.getCoinData();
-    setState(() {
-      exchangeRate = double.parse((data['Realtime Currency Exchange Rate']['5. Exchange Rate']));  
-    });
-    
+  bool isWaiting = false;
+
+  void getData() async {
+    isWaiting = true;
+    CoinData coinData = CoinData();
+    try {
+      var data = await coinData.getCoinData(selectedCurrency);
+      isWaiting = false;
+      setState(() {
+        exchangeRate = data;
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
-List<Widget> getCrypto(){
+  List<Widget> getCrypto() {
+    List<Widget> crypto = [];
 
-List<Widget> crypto = [];
+    getData();
 
-for (String item in cryptoList){
-
-   getData(item);
-   crypto.add(CryptoCard(cryptoCurrency: item, exchangeRate: exchangeRate, selectedCurrency: selectedCurrency));
-}
-    crypto.add(
-           Container(
-            height: 150.0,
-            alignment: Alignment.center,
-            padding: EdgeInsets.only(bottom: 30.0),
-            color: Colors.lightBlue,
-            child: Platform.isIOS ? iOSPicker() : androidDropdown(),
-          ));
-return crypto;
-
-}
-
+    for (String item in cryptoList) {
+      crypto.add(CryptoCard(
+          cryptoCurrency: item,
+          exchangeRate: exchangeRate[item],
+          selectedCurrency: selectedCurrency));
+    }
+    crypto.add(Container(
+      height: 150.0,
+      alignment: Alignment.center,
+      padding: EdgeInsets.only(bottom: 30.0),
+      color: Colors.lightBlue,
+      child: Platform.isIOS ? iOSPicker() : androidDropdown(),
+    ));
+    return crypto;
+  }
 
   @override
   void initState() {
     super.initState();
-    getCrypto();
+    getData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('🤑 Coin Ticker'),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: getCrypto()
-      ),
-    );
+        appBar: AppBar(
+          title: Text('🤑 Coin Ticker'),
+        ),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            CryptoCard(
+                cryptoCurrency: 'BTC',
+                exchangeRate: isWaiting ? '?' : exchangeRate['BTC'],
+                selectedCurrency: selectedCurrency),
+            CryptoCard(
+                cryptoCurrency: 'ETH',
+                exchangeRate: isWaiting ? '?' : exchangeRate['ETH'],
+                selectedCurrency: selectedCurrency),
+            CryptoCard(
+                cryptoCurrency: 'LTC',
+                exchangeRate: isWaiting ? '?' : exchangeRate['LTC'],
+                selectedCurrency: selectedCurrency),
+            Container(
+              height: 150.0,
+              alignment: Alignment.center,
+              padding: EdgeInsets.only(bottom: 30.0),
+              color: Colors.lightBlue,
+              child: Platform.isIOS ? iOSPicker() : androidDropdown(),
+            ),
+          ],
+        ));
   }
 }
 
 class CryptoCard extends StatelessWidget {
-  const CryptoCard({
-    Key key,
-    @required this.exchangeRate,
-    @required this.selectedCurrency,
-    @required this.cryptoCurrency
-  }) : super(key: key);
+  const CryptoCard(
+      {Key key,
+      @required this.exchangeRate,
+      @required this.selectedCurrency,
+      @required this.cryptoCurrency})
+      : super(key: key);
 
-  final double exchangeRate;
+  final String exchangeRate;
   final String selectedCurrency;
   final String cryptoCurrency;
 
@@ -135,7 +152,8 @@ class CryptoCard extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
           child: Text(
-            '1 $cryptoCurrency = ${exchangeRate.toStringAsFixed(2)} $selectedCurrency',
+            // '1 $cryptoCurrency = ${exchangeRate.toStringAsFixed(2)} $selectedCurrency',
+            '1 $cryptoCurrency = $exchangeRate $selectedCurrency',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 20.0,
