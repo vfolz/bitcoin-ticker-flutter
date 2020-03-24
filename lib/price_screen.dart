@@ -3,6 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'coin_data.dart';
 import 'dart:io' show Platform;
 
+import 'coin_data.dart';
+
+
 class PriceScreen extends StatefulWidget {
   @override
   _PriceScreenState createState() => _PriceScreenState();
@@ -31,7 +34,7 @@ class _PriceScreenState extends State<PriceScreen> {
       onChanged: (value) {
         setState(() {
           selectedCurrency = value;
-          getData();
+          getCrypto();
 
         });
       },
@@ -55,9 +58,9 @@ class _PriceScreenState extends State<PriceScreen> {
   }
 
  
-  void getData() async {
+  void getData(String cryptoCurrency) async {
     String url =
-        'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=BTC&to_currency=$selectedCurrency&apikey=$kApiKey';
+        'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=$cryptoCurrency&to_currency=$selectedCurrency&apikey=$kApiKey';
     CoinData coinData = CoinData(url);
     data = await coinData.getCoinData();
     setState(() {
@@ -66,10 +69,32 @@ class _PriceScreenState extends State<PriceScreen> {
     
   }
 
+List<Widget> getCrypto(){
+
+List<Widget> crypto = [];
+
+for (String item in cryptoList){
+
+   getData(item);
+   crypto.add(CryptoCard(exchangeRate: exchangeRate, selectedCurrency: selectedCurrency));
+}
+    crypto.add(
+           Container(
+            height: 150.0,
+            alignment: Alignment.center,
+            padding: EdgeInsets.only(bottom: 30.0),
+            color: Colors.lightBlue,
+            child: Platform.isIOS ? iOSPicker() : androidDropdown(),
+          ));
+return crypto;
+
+}
+
+
   @override
   void initState() {
     super.initState();
-    getData();
+    //getCrypto();
   }
 
   @override
@@ -81,16 +106,7 @@ class _PriceScreenState extends State<PriceScreen> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          CryptoCard(exchangeRate: exchangeRate, selectedCurrency: selectedCurrency),
-          Container(
-            height: 150.0,
-            alignment: Alignment.center,
-            padding: EdgeInsets.only(bottom: 30.0),
-            color: Colors.lightBlue,
-            child: Platform.isIOS ? iOSPicker() : androidDropdown(),
-          ),
-        ],
+        children: getCrypto()
       ),
     );
   }
