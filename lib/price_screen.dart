@@ -3,8 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'coin_data.dart';
 import 'dart:io' show Platform;
 
-import 'coin_data.dart';
-
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -76,7 +74,7 @@ List<Widget> crypto = [];
 for (String item in cryptoList){
 
    getData(item);
-   crypto.add(CryptoCard(exchangeRate: exchangeRate, selectedCurrency: selectedCurrency));
+   crypto.add(CryptoCard(cryptoCurrency: item, exchangeRate: exchangeRate, selectedCurrency: selectedCurrency));
 }
     crypto.add(
            Container(
@@ -94,7 +92,7 @@ return crypto;
   @override
   void initState() {
     super.initState();
-    //getCrypto();
+    getCrypto();
   }
 
   @override
@@ -117,10 +115,12 @@ class CryptoCard extends StatelessWidget {
     Key key,
     @required this.exchangeRate,
     @required this.selectedCurrency,
+    @required this.cryptoCurrency
   }) : super(key: key);
 
   final double exchangeRate;
   final String selectedCurrency;
+  final String cryptoCurrency;
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +135,7 @@ class CryptoCard extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
           child: Text(
-            '1 BTC = ${exchangeRate.toStringAsFixed(2)} $selectedCurrency',
+            '1 $cryptoCurrency = ${exchangeRate.toStringAsFixed(2)} $selectedCurrency',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 20.0,
